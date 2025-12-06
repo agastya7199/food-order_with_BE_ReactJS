@@ -1,11 +1,11 @@
-import { useRef, forwardRef, useImperativeHandle, useContext } from 'react';
+import { useRef, forwardRef, useImperativeHandle } from 'react';
 import { createPortal } from 'react-dom';
-import CartContextComp from '../context/CartContextComp';
+import { useCart } from '../context/CartContextComp';
 import { calculateCartTotal } from '../utils.js';
 import Checkout from './Checkout.jsx';
 
 const CartModal = forwardRef(function ({}, ref) {
-    const { items, handleUpdateItems } = useContext(CartContextComp.cartContext);
+    const { items, handleUpdateItems } = useCart();
     const cartTotal = calculateCartTotal(items);
     const cartModal = useRef();
     const checkoutRef = useRef();

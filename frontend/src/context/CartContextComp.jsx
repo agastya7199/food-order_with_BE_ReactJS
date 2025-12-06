@@ -1,7 +1,9 @@
-import { useState, createContext } from 'react';
+import { useState, createContext, useContext, useEffect } from 'react';
 // import CartContext from './CartContext';
 
-const CartContext = createContext({
+const CART_STORAGE_KEY = 'foodOrderCart';
+
+export const CartContext = createContext({
     items: [],
     handleAddItems: () => {},
     handleDeleteItems: () => {},
@@ -9,7 +11,16 @@ const CartContext = createContext({
 });
 
 export default function CartContextComp({ children }) {
-    const [cartItems, setCartItems] = useState([]);
+    const [cartItems, setCartItems] = useState(() => {
+        // Initialize from localStorage
+        const savedCart = localStorage.getItem(CART_STORAGE_KEY);
+        return savedCart ? JSON.parse(savedCart) : [];
+    });
+
+    // Save to localStorage whenever cart changes
+    useEffect(() => {
+        localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
+    }, [cartItems]);
 
     function handleAddItemsToCart(selectedElement) {
         setCartItems((prevCartItems) => {
@@ -60,13 +71,14 @@ export default function CartContextComp({ children }) {
     };
 
     return (
-        <>
-            <CartContext.Provider value={{ ...cartCtx, setCartItems }}>
-                {children}
-            </CartContext.Provider>
-        </>
+        <CartContext.Provider value={{ ...cartCtx, setCartItems }}>{children}</CartContext.Provider>
     );
 }
 
-CartContextComp.cartContext = CartContext;
-// adding new property named "cartContext" to function object and assigning context definition to it.
+export const useCart = () => {
+    const context = useContext(CartContext);
+    if (!context) {
+        throw new Error('useCart must be used within CartContextComp');
+    }
+    return context;
+};
